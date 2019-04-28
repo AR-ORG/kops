@@ -2,13 +2,12 @@
 
 ##  A.  Setup KOPS on the machine 
 
-    1.  wget https://github.com/kubernetes/kops/releases/download/1.10.0/kops-linux-amd64
-    
-    2.  chmod +x kops-linux-amd64
+    1.  curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
 
-    3.  mv kops-linux-amd64 /usr/local/bin/kops
+    2.  chmod +x ./kops
 
-    4. Edit .bashrc to add /usr/local/bin/ in $PATH. Reload .bashrc using - source .bashrc
+    3.  sudo mv ./kops /usr/local/bin/
+
     
 ##  B.  Setup kubectl on the machine
 
@@ -64,33 +63,24 @@
         
 ##  D.  Create cluster using KOPS 
 
-    1.  Using terraform 
-        
-        kops create cluster \
-        --name=kubernetesfederatedcluster.com \
-        --state=s3://clusters.kubernetesfederatedcluster.com \
-        --authorization RBAC \
-        --zones=us-east-1c \
-        --node-count=2 \
-        --node-size=t2.micro \
-        --master-size=t2.micro \
-        --master-count=1 \
-        --dns-zone=kubernetesfederatedcluster.com \
-        --out=terraform_code \
-        --target=terraform \
-        --ssh-public-key=/root/.ssh/id_rsa.pub
-        
-        terraform plan
-        
-        terraform apply
-        
-    2.  Using Kops without terraform with default values
+      Using Kops without terraform with default values
     
         export KOPS_STATE_STORE=s3://clusters.kubernetesfederatedcluster.com 
         
         kops create cluster --zones=us-east-1c kubernetesfederatedcluster.com
         
         kops update cluster kubernetesfederatedcluster.com
+        
+      
+      Using KOPS with private hosted zones - 
+      
+         kops create cluster k8s-clusters.example.com   \
+         --node-count=6   \
+         --zones=us-east-1c \
+         --networking=calico \
+         --dns=private \
+         --master-count=3
+
         
 
 
